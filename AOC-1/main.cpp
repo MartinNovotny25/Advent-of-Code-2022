@@ -2,11 +2,7 @@
 #include <fstream>
 #include <vector>
 
-typedef struct returnValues{
-    std::vector<int>top3_MostCalories = {0,0,0};
-} returnValues;
-
-returnValues calculateMostCalories(std::fstream& inputFile)
+std::vector<int> calculateMostCalories(std::fstream& inputFile)
 {
     inputFile.open("input.txt");
     if (!inputFile.is_open()) { std::cerr << "File not opened\n"; exit(1); }
@@ -16,13 +12,13 @@ returnValues calculateMostCalories(std::fstream& inputFile)
 
     std::string line;
 
-    returnValues returnStruct;
+    std::vector<int>top3_MostCalories = {0,0,0};
 
     while(std::getline(inputFile, line)) {
         if (line.empty()) {
             for (int i = 0; i < 3; i++) {
-                if (returnStruct.top3_MostCalories[i] < currentCaloriesSum) {
-                    returnStruct.top3_MostCalories[i] = currentCaloriesSum;
+                if (top3_MostCalories[i] < currentCaloriesSum) {
+                    top3_MostCalories[i] = currentCaloriesSum;
                     break;
                 }
             }
@@ -35,16 +31,16 @@ returnValues calculateMostCalories(std::fstream& inputFile)
     }
 
     inputFile.close();
-    return returnStruct;
+    return top3_MostCalories;
 }
 
 int main() {
     std::fstream inputFile;
-    returnValues values = calculateMostCalories(inputFile);
+    std::vector<int> values = calculateMostCalories(inputFile);
     int sum = 0;
-    for (int i = 0; i < values.top3_MostCalories.size(); i++) {
-        sum += values.top3_MostCalories[i];
-        std::cout << "Value " << i << ": " << values.top3_MostCalories[i] << std::endl;
+    for (int i = 0; i < values.size(); i++) {
+        sum += values[i];
+        std::cout << "Value " << i << ": " << values[i] << std::endl;
     }
     std::cout << "Total sum: " << sum << std::endl;
     return 0;
