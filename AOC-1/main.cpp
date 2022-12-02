@@ -1,3 +1,24 @@
+// Advent of Code, Day 1
+// Author: Martin Novotný Mlinárcsik, FIT BUT
+// Github: https://github.com/MartinNovotny25
+// LinkedIn: https://www.linkedin.com/in/martin-novotn%C3%BD-mlin%C3%A1rcsik-377616242/
+// 1.12.2022
+
+// Program implements an algorithm that sums the number of calories carried by one elf.
+// A .txt file (input.txt) is given as an input, which contains integer values -
+// One value per line, where that line represents a "snack" carried by the given elf,
+// and the value represents how many calories the snack is worth. Empty line between
+// 2 sets of lines represents a new elf with separate "list" of snacks;
+
+// In Part1, algorithm had to find the elf with the highest sum of calories in his snacks.
+// Algorithm summed up all caloric values carried by one elf and compared the sum to the largest
+// current sum. If the current sum is larger than the current largest sum, the current largest sum is
+// replaced by the current sum of calories carried by an elf.
+
+// In Part2, algorithm performs a similar action, but now it has to store the top 3 largest sums of calories.
+// The only difference is that now, we store 3 current largest sums (largest at the lowest index) and these values
+// are then compared with each individual successive sum.
+
 #include <iostream>
 #include <fstream>
 #include <vector>

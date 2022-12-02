@@ -2,7 +2,7 @@
 // Author: Martin Novotný Mlinárcsik, FIT BUT
 // Github: https://github.com/MartinNovotny25
 // LinkedIn: https://www.linkedin.com/in/martin-novotn%C3%BD-mlin%C3%A1rcsik-377616242/
-// 12.2.2022
+// 2.12.2022
 
 // Program implements decision-making when playing a game of "Rock, Paper, Scissors" according to a given
 // strategy plan. An input file, which is given, is a .txt file that contains 2 columns:
