@@ -59,3 +59,6 @@ AOC-3/cmake-build-debug/CMakeFiles/TargetDirectories.txt
 AOC-3/cmake-build-debug/inputCopy.txt
 AOC-3/cmake-build-debug/test.txt
 AOC-3/CMakeLists.txt
+*.xml
+.DS_Store
+main
