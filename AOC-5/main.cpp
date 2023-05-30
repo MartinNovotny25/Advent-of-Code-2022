@@ -78,6 +78,7 @@ int main() {
 //            std::cout << "RESIZED ARRAY: " << std::endl;
 //            printArray(array, maxColumnHeights[columnsNum]);
         }
+
         moveBlocks(array, maxColumnHeights,columnHeights, instruction, instruction.amount, columnsNum);
         //moveBlocks(char* p_array, int* maxColumnHeights, int* currentHeights, instructionParams instruction, int amount, int colsNum)
         //int moveBlocks(char* p_array, int* currentHeights, instructionParams instruction, int amount, int rowsNum)
@@ -240,6 +241,9 @@ int moveBlocks(char* p_array, int* maxColumnHeights, int* currentHeights, instru
         exit(-1);
     }
 
+    toOffset -= amount -1;
+
+
     std::cout << "------ MOVE BLOCK START ------" << std::endl;
     std::cout << "FROM OFFSET: " << fromOffset << std::endl;
     std::cout << "FROM SKIP " << moveFromSkip << std::endl;
@@ -248,7 +252,7 @@ int moveBlocks(char* p_array, int* maxColumnHeights, int* currentHeights, instru
     std::cout << "------ MOVE BLOCK FINISH ------" << std::endl;
 
     for (int i = 0; i < amount; ++i) {
-       p_array[toOffset - i] = p_array[fromOffset + i];
+       p_array[toOffset + i] = p_array[fromOffset + i];
        p_array[fromOffset + i] = '\0';
     }
 
