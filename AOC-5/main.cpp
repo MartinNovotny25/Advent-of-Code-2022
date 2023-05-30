@@ -331,11 +331,6 @@ char* resizeArray(char** p_oldArray, int* maxColumnHeights, int* columnHeights, 
     }
 
     // Free the double pointer
-    // Fuck this tbh
-//    for (int i = 0; i < maxColumnHeights[columnNum]; ++i) {
-//        std::cout << &p_oldArray[i] << std::endl;
-//        free(&p_oldArray[i]);
-//    }
     free(*p_oldArray);
 
     // Update the current maximum heights of both columns.
