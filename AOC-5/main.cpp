@@ -6,7 +6,6 @@
 
 #include <iostream>
 #include <vector>
-#include <fstream>
 #include <cstdio>
 
 typedef struct instructionParams {
@@ -19,7 +18,6 @@ typedef struct instructionParams {
 int parseColumns(FILE* inputFile);
 int parseLines(FILE* inputFile);
 char* createArray(int columnsNum, int rowsNum, FILE* inputFile);
-//int moveBlocks(char* p_array, int fromOffset, int toOffset, int amount);
 int moveBlocks(char* p_array, int* maxColumnHeights, int* currentHeights, instructionParams instruction, int amount, int colsNum);
 int moveCursorToInstructions(FILE* inputFile, int columnsNum, int rowsNum);
 int numberOfInstructions(FILE* inputFile);
@@ -30,7 +28,6 @@ int getStackTop(char* p_array, int skipIndexes, int columnSize);
 int* calculateInitialHeight(char* p_array, int columnSize, int columnNum);
 int* createMaxColumnHeights(int rowsNum, int columnNum);
 char* resizeArray(char** p_oldArray, int* maxColumnHeights, int* columnHeights, int column, int columnNum);
-void testArray(char** p_oldArray, int* maxColumnHeights, int* columnHeights, int column, int columnNum);
 void detectMissingBlock(char* array, int* maxHeights);
 
 
@@ -41,13 +38,13 @@ void detectMissingBlock(char* array, int* maxHeights);
 
 #define ASCII_CONSTANT 48
 #define SUM_OF_HEIGHTS_INDEX 1
-#define MEMORY_BLOCK 5
+#define MEMORY_BLOCK 1
 
 
 int main() {
     FILE* inputFile;
     inputFile = fopen("AOC-5/input.txt", "r");
-    if (inputFile == NULL) {
+    if (inputFile == nullptr) {
         std::cerr << "File not found" << std::endl;
         fclose(inputFile);
     }
@@ -65,40 +62,16 @@ int main() {
     moveCursorToInstructions(inputFile, columnsNum, rowsNum);
     printArray(array, columnsNum, rowsNum);
 
-
-
     for (short int i = 0; i < instructionCount; ++i) {;
-        std::cout << "INSTRUCTION NUM: " << i +1 << std::endl;
         instructionParams instruction = getInstruction(inputFile);
         while (columnHeights[instruction.moveTo] + instruction.amount > maxColumnHeights[instruction.moveTo]) {
-            array = resizeArray(&array, maxColumnHeights, columnHeights,
-                                instruction.moveTo, columnsNum);
-
-
-//            std::cout << "RESIZED ARRAY: " << std::endl;
-//            printArray(array, maxColumnHeights[columnsNum]);
+            array = resizeArray(&array, maxColumnHeights, columnHeights,instruction.moveTo, columnsNum);
         }
 
         moveBlocks(array, maxColumnHeights,columnHeights, instruction, instruction.amount, columnsNum);
-        //moveBlocks(char* p_array, int* maxColumnHeights, int* currentHeights, instructionParams instruction, int amount, int colsNum)
-        //int moveBlocks(char* p_array, int* currentHeights, instructionParams instruction, int amount, int rowsNum)
-        //printArray(array, columnsNum, rowsNum);
-        printArray(array, maxColumnHeights[columnsNum]);
         detectMissingBlock(array, maxColumnHeights);
     }
-
-    //moveBlocks(array, 3, 11, 2);
-    //printArray(array, columnsNum, rowsNum);
-    //array = resizeArray(&array, maxColumnHeights, columnHeights, 1, columnsNum);
-    //std::cout << "Final: ";
-    //printArray(array, maxColumnHeights[columnsNum]);
-
-//    std::cout << (void*)array << std::endl;
-//    testArray(&array, maxColumnHeights, columnHeights, 1, columnsNum);
-//    std::cout << (void*)array << std::endl;
-
-
-
+    printArray(array, maxColumnHeights[columnsNum]);
     fclose(inputFile);
     //free(array);
     free(columnHeights);
@@ -208,9 +181,6 @@ char* createArray(int columnsNum, int rowsNum, FILE* inputFile) {
 // fromOffset - Index of the block that is being moved
 // toOffset - Index of the empty space, to which the block is being moved to
 int moveBlocks(char* p_array, int* maxColumnHeights, int* currentHeights, instructionParams instruction, int amount, int colsNum) {
-    std::cout <<
-    "moveFrom: " << instruction.moveFrom << " moveTo: " << instruction.moveTo << "  amount: " << instruction.amount << std::endl;
-
     int moveToSkip = 0, moveFromSkip = 0;
     for (int i = 0; i < instruction.moveTo; i++) {
         moveToSkip += maxColumnHeights[i];
@@ -222,34 +192,7 @@ int moveBlocks(char* p_array, int* maxColumnHeights, int* currentHeights, instru
     int fromOffset = getStackTop(p_array, moveFromSkip, maxColumnHeights[instruction.moveFrom]);
     int toOffset = getStackTop(p_array, moveToSkip, maxColumnHeights[instruction.moveTo]);
     if (toOffset > 0) {toOffset--;}
-
-    if (fromOffset < 0) {
-        std::cout << "*** ERROR ***" << std::endl;
-        std::cout << "fromOffset < 0, value:  " << fromOffset << std::endl;
-        std::cout << "TO SKIP " << moveToSkip << std::endl;
-        std::cout << "maxColumnSize: " << maxColumnHeights[instruction.moveFrom] << std::endl;
-        std::cout << "ColumnSize: " << currentHeights[instruction.moveFrom] << std::endl;
-        std::cout << instruction.moveFrom << " " << instruction.moveTo << " " << instruction.amount << std::endl;
-        exit(-1);
-    } else if (toOffset < 0) {
-        std::cout << "*** ERROR ***" << std::endl;
-        std::cout << "toOffset < 0, value:  " << toOffset << std::endl;
-        std::cout << "FROM SKIP " << moveFromSkip << std::endl;
-        std::cout << "maxColumnSize: " << maxColumnHeights[instruction.moveTo] << std::endl;
-        std::cout << "ColumnSize: " << currentHeights[instruction.moveTo] << std::endl;
-        std::cout << instruction.moveFrom << " " << instruction.moveTo << " " << instruction.amount << std::endl;
-        exit(-1);
-    }
-
     toOffset -= amount -1;
-
-
-    std::cout << "------ MOVE BLOCK START ------" << std::endl;
-    std::cout << "FROM OFFSET: " << fromOffset << std::endl;
-    std::cout << "FROM SKIP " << moveFromSkip << std::endl;
-    std::cout << "TO OFFSET: " << toOffset << std::endl;
-    std::cout << "TO SKIP " << moveToSkip << std::endl;
-    std::cout << "------ MOVE BLOCK FINISH ------" << std::endl;
 
     for (int i = 0; i < amount; ++i) {
        p_array[toOffset + i] = p_array[fromOffset + i];
@@ -263,7 +206,6 @@ int moveBlocks(char* p_array, int* maxColumnHeights, int* currentHeights, instru
 
 int getStackTop(char* p_array, int skipIndexes, int columnSize) {
     char symbol = '\0';
-    std::cout << "column size: " << columnSize;
     for (int i = 0; i < columnSize; i++) {
         symbol = p_array[i + skipIndexes];
         if (symbol >= 'A' && symbol <= 'Z') { return i + skipIndexes; }
@@ -274,16 +216,6 @@ int getStackTop(char* p_array, int skipIndexes, int columnSize) {
 
 char* resizeArray(char** p_oldArray, int* maxColumnHeights, int* columnHeights, int column, int columnNum) {
     // Create new, expanded array
-
-    // TODO - Ak size pola bude 0, nekopirovat nic, iba rozsirit a pokracovat dalej
-
-    std::cout << "---------- RESIZING BEGIN -------------" << std::endl;
-    std::cout << "Celkovy pocet indexov: " << maxColumnHeights[columnNum] << std::endl;
-    std::cout << "Column: " << column << " Size: "<< columnHeights[column] << " Maximum Size: "<< maxColumnHeights[column] <<  std::endl;
-    std::cout << "ColumnNum:" << columnNum << std::endl;
-    printArray(*p_oldArray, maxColumnHeights[columnNum]);
-    assert(column >= 0);
-
     char* p_newArray = (char *) malloc( (maxColumnHeights[columnNum] + MEMORY_BLOCK));
     memset(p_newArray, '\0', maxColumnHeights[columnNum] + MEMORY_BLOCK);
 
@@ -296,20 +228,15 @@ char* resizeArray(char** p_oldArray, int* maxColumnHeights, int* columnHeights, 
         for (int i = 0; i < numOfBytesPreCols; ++i) {
             p_newArray[i] = (*p_oldArray)[i];
         }
-        std::cout << "First columns copied" << std::endl;
-        printArray(p_newArray, maxColumnHeights[columnNum]);
     }
 
     // Memcpy the expanded column
     int numOfBytesExpandedCol = maxColumnHeights[column];
     if (columnHeights[column] != 0) {
         for (int i = 0; i < numOfBytesExpandedCol; ++i) {
-            //ZJstd::cout << "i: " << i << " Char: " << (*p_oldArray)[i] << std::endl;
             p_newArray[numOfBytesPreCols + MEMORY_BLOCK + i] = (*p_oldArray)[i + numOfBytesPreCols];
         }
     }
-    std::cout << "Expanded column copied" << std::endl;
-    printArray(p_newArray, maxColumnHeights[columnNum] + MEMORY_BLOCK);
 
     // Memcpy of columns after the column that is being expanded (excludes last column)
     int numOfBytesPostCols = 0;
@@ -317,16 +244,12 @@ char* resizeArray(char** p_oldArray, int* maxColumnHeights, int* columnHeights, 
         for (int i = column + 1; i < columnNum; ++i) {
             numOfBytesPostCols += maxColumnHeights[i];
         }
-        std::cout << "numOfBytesPostCols: " << numOfBytesPostCols << std::endl;
 
         // Sum of numOfBytesPreCols and numOfBytesExpandedCol (size of the column pre-expansion) to calculate offset for data after the expanded column
         int postExpColOffset = numOfBytesPreCols + numOfBytesExpandedCol;
-        std::cout << "postExpColOffset: " << postExpColOffset << std::endl;
         for (int i = 0; i < numOfBytesPostCols; ++i) {
             p_newArray[postExpColOffset + MEMORY_BLOCK + i] = (*p_oldArray)[i + postExpColOffset];
         }
-        std::cout << "Post columns copied" << std::endl;
-        printArray(p_newArray, maxColumnHeights[columnNum] + MEMORY_BLOCK);
     }
 
     // Free the double pointer
@@ -338,12 +261,6 @@ char* resizeArray(char** p_oldArray, int* maxColumnHeights, int* columnHeights, 
     //free(*p_oldArray);
     maxColumnHeights[column] += MEMORY_BLOCK;
     maxColumnHeights[columnNum] += MEMORY_BLOCK;
-
-    std::cout << "Celkovy pocet indexov post expand: " << maxColumnHeights[columnNum] << std::endl;
-    std::cout << "Column: " << column << " Size: "<< columnHeights[column] << " Maximum Size: "<< maxColumnHeights[column] <<  std::endl;
-    std::cout << "---------- RESIZING END -------------" << std::endl;
-
-
     return p_newArray;
 }
 
@@ -359,7 +276,6 @@ int* calculateInitialHeight(char* p_array, int columnSize, int columnNum) {
         }
         index++;
     }
-
     return heights;
 }
 
@@ -369,8 +285,6 @@ int* createMaxColumnHeights(int rowsNum, int columnsNum) {
         maxColumnHeights[i] = rowsNum;
     }
     maxColumnHeights[columnsNum] = rowsNum * columnsNum;
-
-
     return maxColumnHeights;
 }
 
@@ -386,20 +300,6 @@ void printArray(char* p_array, int size) {
         std::cout << p_array[i] << " ";
     }
     std::cout << std::endl;
-}
-
-void testArray(char** p_oldArray, int* maxColumnHeights, int* columnHeights, int column, int columnNum) {
-    //printArray(p_oldArray, maxColumnHeights[columnNum]);
-   // printArray(p_oldArray, (columnHeights[columnNum]));
-    char* p_newArray = (char *) malloc(sizeof(char) * (columnHeights[columnNum] + MEMORY_BLOCK));
-    memset(p_newArray, '5', (columnHeights[columnNum] + MEMORY_BLOCK));
-
-    memcpy(&p_newArray[1], *p_oldArray,(columnHeights[columnNum]));
-    //std::cout << "OLD: " << (void*)* p_oldArray << std::endl;
-    //std::cout << "NEW: " << (void*) p_newArray << std::endl;
-    //printArray(p_newArray, (columnHeights[columnNum] + MEMORY_BLOCK));
-    //free(*p_oldArray);
-    *p_oldArray = p_newArray;
 }
 
 void detectMissingBlock(char* array, int* maxHeights) {
