@@ -4,6 +4,17 @@
 // LinkedIn: https://www.linkedin.com/in/martin-novotn%C3%BD-mlin%C3%A1rcsik-377616242/
 // 25.5.2023
 
+/*
+ * In AOC day 5, a grid of crates and a set of instructions are given. Instructions say how many crates are to be moved
+ * from one column to another one. Crates a moved 1 by 1, so their original order will be reversed upon placing.
+ *
+ * I've done AOC5 mostly using C and C's dynamic memory allocation as practice (was painful) - as such,
+ * code can contain critical errors I'm not aware of, so be careful if you play with it.
+ * According to valgrind, all allocated memory is freed.
+ *
+ * In part 2, the original order of the crates is retained.
+ */
+
 #include <iostream>
 #include <vector>
 #include <cstdio>
