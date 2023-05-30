@@ -8,6 +8,7 @@
 #include <vector>
 #include <fstream>
 #include <cstdio>
+#include <cstring>
 
 typedef struct instructionParams {
     int moveFrom;
@@ -85,7 +86,7 @@ int main() {
     printArray(array, maxColumnHeights[columnsNum]); // Prints the final array
 
     fclose(inputFile);
-    //free(array);
+    free(array);
     free(columnHeights);
     free(maxColumnHeights);
 }
@@ -326,7 +327,7 @@ char* resizeArray(char** p_oldArray, int* maxColumnHeights, int* columnHeights, 
 //        std::cout << &p_oldArray[i] << std::endl;
 //        free(&p_oldArray[i]);
 //    }
-    //free(*p_oldArray);
+    free(*p_oldArray);
 
     // Update the current maximum heights of both columns.
     maxColumnHeights[column] += MEMORY_BLOCK;
