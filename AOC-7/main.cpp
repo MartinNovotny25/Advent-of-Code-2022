@@ -21,7 +21,9 @@
 #define REQUIRED_SPACE 30000000
 
 int main() {
-    std::ifstream inputStream("C:\\Projects\\Advent-of-Code-2022\\AOC-7\\input.txt");
+
+    // Path to input
+    std::ifstream inputStream("");
 
      // Maps for tracking
      // Ordered map for directory tree structure
