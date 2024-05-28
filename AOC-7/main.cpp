@@ -17,7 +17,8 @@
 #include <stack>
 #include <algorithm>
 
-void removeDuplicates(std::string input);
+#define FILESYSTEM_SPACE 70000000
+#define REQUIRED_SPACE 30000000
 
 int main() {
     std::ifstream inputStream("C:\\Projects\\Advent-of-Code-2022\\AOC-7\\input.txt");
@@ -143,8 +144,7 @@ int main() {
      }
 
     // If their nestLevel is equal to current maxNestLevel, their values are to be propagated up
-     maxNestLevel -= 1;
-     while (maxNestLevel > -1) {
+     while ( maxNestLevel > -1) {
          for (const auto& dir : directoryTree) {
              if (dir.second.first == maxNestLevel) {
                  for(const auto& subdir : dir.second.second) {
@@ -152,7 +152,7 @@ int main() {
                  }
              }
          }
-         maxNestLevel--;
+          maxNestLevel--;
      }
 
      std::cout << std::endl;
@@ -167,6 +167,19 @@ int main() {
 
     // Print the result
      std::cout << totalSum << std::endl;
+
+    // Part 2 - Deleting directories
+    int32_t currentFreeSpace = FILESYSTEM_SPACE - directorySize["/"];
+    int32_t currentMin = FILESYSTEM_SPACE;
+    for (const auto& dir : directorySize) {
+        if (currentFreeSpace + dir.second > REQUIRED_SPACE) {
+            if (currentMin > dir.second) {
+                currentMin = dir.second;
+            }
+        }
+    }
+
+    std::cout << currentMin << std::endl;
 
      return 0;
 }
