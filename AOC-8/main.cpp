@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <chrono>
 
 #define UP_RIGHT    0
 #define DOWN_RIGHT  1
@@ -30,9 +29,35 @@ bool calculateVisibility(
         const int32_t&               treeHeight,
         const uint8_t&              quadrant);
 
+bool checkUp( const std::vector<int32_t>& forestVector,
+                const int16_t&              currentHeight,
+                const int16_t&              currentWidth,
+                const int16_t&              maxHeight,
+                const int16_t&              maxWidth,
+                const int32_t&              treeHeight);
+
+bool checkDown( const std::vector<int32_t>& forestVector,
+                const int16_t&              currentHeight,
+                const int16_t&              currentWidth,
+                const int16_t&              maxHeight,
+                const int16_t&              maxWidth,
+                const int32_t&              treeHeight);
+
+bool checkLeft( const std::vector<int32_t>& forestVector,
+                const int16_t&              currentHeight,
+                const int16_t&              currentWidth,
+                const int16_t&              maxHeight,
+                const int16_t&              maxWidth,
+                const int32_t&              treeHeight);
+
+bool checkRight( const std::vector<int32_t>& forestVector,
+                const int16_t&              currentHeight,
+                const int16_t&              currentWidth,
+                const int16_t&              maxHeight,
+                const int16_t&              maxWidth,
+                const int32_t&              treeHeight);
 
 int main() {
-    auto start = std::chrono::high_resolution_clock::now();
     // Input file variable and path
     FILE* inputFile;
     inputFile = fopen("C:\\Projects\\Advent-of-Code-2022\\AOC-8\\input.txt","r");
@@ -53,16 +78,13 @@ int main() {
 
     // Fill 1D forest vector and determine dimensions
     while (symbol != EOF) {
-        if (symbol == '\n') { height++                          ;}
-        else                { forestVector1D.push_back(symbol-48 )  ;}
-        if (height == 0)    { width++                           ;}
+        if (symbol == '\n') { height++                                  ;}
+        else                { forestVector1D.push_back(symbol-48 )    ;}
+        if (height == 0)    { width++                                   ;}
 
         symbol = static_cast<char>(fgetc(inputFile));
     }
 
-    std::cout << height << " " << width << std::endl;
-
-    int32_t forestSize = width * height;
     int32_t visibleTrees = 0;
 
     // Start y from 1 since the first row is always visible
@@ -70,33 +92,20 @@ int main() {
     for (int16_t  y = 1; y < (height-1); ++y) {
         for (int16_t  x = 1; x < (width-1); ++x) {
 
-            int32_t&     treeHeight     = forestVector1D[(y * width)  + x];
+            int32_t&    treeHeight      = forestVector1D[(y * width)  + x];
+            uint8_t     quadrant        = calculateQuadrant(height,width,y,x);
+            bool        visible         = calculateVisibility(forestVector1D,y,x,height,
+                                        width,treeHeight,quadrant);
 
-            uint8_t quadrant = calculateQuadrant(height,width,y,x);
-            //std::cout << (int)quadrant << std::endl;
-            bool visible = calculateVisibility(forestVector1D,y,x,height,width,treeHeight,quadrant);
-            if (visible) {
-                //std::cout << "POINT [" << y << ", " << x << "] VISIBLE" << std::endl;
-                visibleTrees++;
-            } else {
-                //std::cout << "POINT [" << y << ", " << x << "] NOT VISIBLE" << std::endl;
-            }
+            if (visible) { visibleTrees++; }
         }
     }
 
-    for (auto val : forestVector1D) {
-        //std::cout << val << " ";
-    }
-
     std::cout << (visibleTrees + (2*height) + (2*(width-2)))<< std::endl;
-    std::cout << visibleTrees << std::endl;
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start);
-    std::cout << "Duration: " << duration.count() << std::endl;
-
     return 0;
 }
 
+// Determine the quadrant in which the tree is situated
 uint8_t calculateQuadrant(
             const uint16_t          maxHeight,
             const uint16_t          maxWidth,
@@ -112,6 +121,11 @@ uint8_t calculateQuadrant(
 }
 
 
+// Function for calclating overall visibility from all directions
+// Depending on the quadrant in which the tree is situated, different directions are being checked first.
+// We check the direction which is closes the edge first and if the tree is visible from that side, we don't need
+// to traverse the longer directions, saving time
+
 bool calculateVisibility(
         const std::vector<int32_t>& forestVector,
         const int16_t&              currentHeight,
@@ -126,73 +140,57 @@ bool calculateVisibility(
     bool        upHidden       = true;
     bool        downHidden     = true;
 
-    // if (quadrant == UP_RIGHT) {
-         //std::cout << "CURRENT POINT: " << currentWidth << " " << currentHeight << std::endl;
-         //std::cout << "VALUE: " << (int)treeHeight << std::endl;
-        const int32_t currentPosition = (currentHeight * maxWidth) + currentWidth;
-         //std::cout << "CURRENT POSITION: " << currentPosition << std::endl;
+    if (quadrant == UP_RIGHT) {
+        if ((maxHeight - currentHeight) > (maxWidth-currentWidth)) {
+            rightHidden = checkRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upHidden    = checkUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downHidden  = checkDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftHidden  = checkLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        } else {
+            upHidden    = checkUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightHidden = checkRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downHidden  = checkDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftHidden  = checkLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        }
+    } else if (quadrant == DOWN_RIGHT) {
+        if ((maxHeight - currentHeight) > (maxWidth-currentWidth)) {
+            rightHidden = checkRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downHidden  = checkDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upHidden    = checkUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftHidden  = checkLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        } else {
+            downHidden  = checkDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightHidden = checkRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upHidden    = checkUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftHidden  = checkLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        }
+    } else if (quadrant == DOWN_LEFT) {
+        if ((maxHeight - currentHeight) > (maxWidth-currentWidth)) {
+            leftHidden  = checkLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downHidden  = checkDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightHidden = checkRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upHidden    = checkUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        } else {
+            downHidden  = checkDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftHidden  = checkLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightHidden = checkRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upHidden    = checkUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        }
+    } else if (quadrant == UP_LEFT) {
+        if ((maxHeight - currentHeight) > (maxWidth-currentWidth)) {
+            leftHidden  = checkLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upHidden    = checkUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downHidden  = checkDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightHidden = checkRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        } else {
+            upHidden    = checkUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftHidden  = checkLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downHidden  = checkDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightHidden = checkRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        }
+    }
 
-
-       // if (currentWidth > currentHeight) { // closer the side than top
-            for (uint16_t i = 1; i < (maxWidth-currentWidth); ++i) {
-                 // std::cout << "MOVE RIGHT: " <<  currentPosition + i << std::endl;
-                 // std::cout << "VALUE: " << forestVector[currentPosition + i] << std::endl;
-                if (treeHeight > forestVector[currentPosition + i]) {
-                    // std::cout << "MOVE RIGHT: " <<  currentPosition + i << std::endl;
-                    // std::cout << "VALUE: " << forestVector[currentPosition + i] << std::endl;
-                    // return true;
-                    rightHidden = false;
-                } else {
-                    rightHidden = true;
-                    break;
-                }
-            }
-       // } else {
-            for (uint16_t i = 1; 0 <= (currentHeight-i); ++i) { // Move to the top
-                 // std::cout << "MOVE UP: " <<  currentPosition - (maxWidth*i) << std::endl;
-                 // std::cout << "VALUE: " << forestVector[currentPosition - (maxWidth*i)] << std::endl;
-                if (treeHeight > forestVector[currentPosition - (maxWidth*i)]) {
-                    // std::cout << "MOVE UP: " <<  currentPosition - (maxWidth*i) << std::endl;
-                    // std::cout << "VALUE: " << forestVector[currentPosition - (maxWidth*i)] << std::endl;
-                    upHidden = false;
-                    // return true;
-                } else {
-                    upHidden = true;
-                    break;
-                }
-            }
-
-            for (uint16_t i = 1; i <= currentWidth; ++i) { // move to the left
-                 // std::cout << "MOVE LEFT: " <<  currentPosition - i << std::endl;
-                 // std::cout << "VALUE: " << forestVector[currentPosition - i] << std::endl;
-                if (treeHeight > forestVector[currentPosition - i]) {
-                    // std::cout << "MOVE LEFT: " <<  currentPosition - i << std::endl;
-                    // std::cout << "VALUE: " << forestVector[currentPosition - i] << std::endl;
-                    leftHidden = false;
-                    //return true;
-                } else {
-                    leftHidden = true;
-                    break;
-                }
-            }
-
-            for (uint16_t i = 1; i < (maxHeight - currentHeight); ++i) { // Move to the bottom
-                 // std::cout << "MOVE DOWN: " << currentPosition + (maxWidth*i) << std::endl;
-                 // std::cout << "VALUE: " << forestVector[currentPosition + (maxWidth*i)] << std::endl;
-                if (treeHeight > forestVector[currentPosition + (maxWidth*i)]) {
-                    // std::cout << "MOVE DOWN: " << currentPosition + (maxWidth*i) << std::endl;
-                    // std::cout << "VALUE: " << forestVector[currentPosition + (maxWidth*i)] << std::endl;
-                    downHidden = false;
-                    //return true;
-                } else {
-                    downHidden = true;
-                    break;
-                }
-            }
-
-
-        // }
-   // }
+    // Tree is visible if it is visible from atleast 1 direction
     if (!upHidden || !downHidden || !rightHidden || !leftHidden) {
         return true;
     } else {
@@ -230,11 +228,7 @@ bool checkLeft( const std::vector<int32_t>& forestVector,
     bool leftHidden = true;
     const int32_t currentPosition = (currentHeight * maxWidth) + currentWidth;
     for (uint16_t i = 1; i <= currentWidth; ++i) { // move to the left
-        // std::cout << "MOVE LEFT: " <<  currentPosition - i << std::endl;
-        // std::cout << "VALUE: " << forestVector[currentPosition - i] << std::endl;
         if (treeHeight > forestVector[currentPosition - i]) {
-            // std::cout << "MOVE LEFT: " <<  currentPosition - i << std::endl;
-            // std::cout << "VALUE: " << forestVector[currentPosition - i] << std::endl;
             leftHidden = false;
         } else {
             leftHidden = true;
