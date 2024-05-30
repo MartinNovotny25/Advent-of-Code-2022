@@ -57,6 +57,47 @@ bool checkRight( const std::vector<int32_t>& forestVector,
                 const int16_t&              maxWidth,
                 const int32_t&              treeHeight);
 
+int32_t calculateScore(
+        const std::vector<int32_t>& forestVector,
+        const int16_t&              currentHeight,
+        const int16_t&              currentWidth,
+        const int16_t&              maxHeight,
+        const int16_t&              maxWidth,
+        const int32_t&              treeHeight,
+        const uint8_t&              quadrant);
+
+int32_t calcScoreRight(
+        const std::vector<int32_t>& forestVector,
+        const int16_t&              currentHeight,
+        const int16_t&              currentWidth,
+        const int16_t&              maxHeight,
+        const int16_t&              maxWidth,
+        const int32_t&              treeHeight);
+
+int32_t calcScoreLeft(
+        const std::vector<int32_t>& forestVector,
+        const int16_t&              currentHeight,
+        const int16_t&              currentWidth,
+        const int16_t&              maxHeight,
+        const int16_t&              maxWidth,
+        const int32_t&              treeHeight);
+
+int32_t calcScoreUp(
+        const std::vector<int32_t>& forestVector,
+        const int16_t&              currentHeight,
+        const int16_t&              currentWidth,
+        const int16_t&              maxHeight,
+        const int16_t&              maxWidth,
+        const int32_t&              treeHeight);
+
+int32_t calcScoreDown(
+        const std::vector<int32_t>& forestVector,
+        const int16_t&              currentHeight,
+        const int16_t&              currentWidth,
+        const int16_t&              maxHeight,
+        const int16_t&              maxWidth,
+        const int32_t&              treeHeight);
+
 int main() {
     // Input file variable and path
     FILE* inputFile;
@@ -86,6 +127,7 @@ int main() {
     }
 
     int32_t visibleTrees = 0;
+    int32_t bestVisibilityScore = 0;
 
     // Start y from 1 since the first row is always visible
     // Start x from 1 since side is always visible, upper bound is width -1 since side is visible
@@ -95,13 +137,16 @@ int main() {
             int32_t&    treeHeight      = forestVector1D[(y * width)  + x];
             uint8_t     quadrant        = calculateQuadrant(height,width,y,x);
             bool        visible         = calculateVisibility(forestVector1D,y,x,height,
-                                        width,treeHeight,quadrant);
-
+                                                      width,treeHeight,quadrant);
+            int32_t     visibilityScore = calculateScore(forestVector1D,y,x,height,
+                                                 width,treeHeight,quadrant);
             if (visible) { visibleTrees++; }
+            if (bestVisibilityScore < visibilityScore) {bestVisibilityScore = visibilityScore; }
         }
     }
 
     std::cout << (visibleTrees + (2*height) + (2*(width-2)))<< std::endl;
+    std::cout << bestVisibilityScore << std::endl;
     return 0;
 }
 
@@ -276,5 +321,157 @@ bool checkDown( const std::vector<int32_t>& forestVector,
         }
     }
     return downHidden;
+}
+
+int32_t calculateScore(
+        const std::vector<int32_t>& forestVector,
+        const int16_t&              currentHeight,
+        const int16_t&              currentWidth,
+        const int16_t&              maxHeight,
+        const int16_t&              maxWidth,
+        const int32_t&              treeHeight,
+        const uint8_t&              quadrant)
+{
+    int32_t        leftScore     = 0;
+    int32_t        rightScore    = 0;
+    int32_t        upScore       = 0;
+    int32_t        downScore     = 0;
+
+    if (quadrant == UP_RIGHT) {
+        if ((maxHeight - currentHeight) > (maxWidth-currentWidth)) {
+            rightScore = calcScoreRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upScore    = calcScoreUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downScore  = calcScoreDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftScore  = calcScoreLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        } else {
+            upScore    = calcScoreUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightScore = calcScoreRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downScore  = calcScoreDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftScore  = calcScoreLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        }
+    } else if (quadrant == DOWN_RIGHT) {
+        if ((maxHeight - currentHeight) > (maxWidth-currentWidth)) {
+            rightScore = calcScoreRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downScore  = calcScoreDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upScore    = calcScoreUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftScore  = calcScoreLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        } else {
+            downScore  = calcScoreDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightScore = calcScoreRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upScore    = calcScoreUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftScore  = calcScoreLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        }
+    } else if (quadrant == DOWN_LEFT) {
+        if ((maxHeight - currentHeight) > (maxWidth-currentWidth)) {
+            leftScore  = calcScoreLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downScore  = calcScoreDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightScore = calcScoreRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upScore    = calcScoreUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        } else {
+            downScore  = calcScoreDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftScore  = calcScoreLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightScore = calcScoreRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upScore    = calcScoreUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        }
+    } else if (quadrant == UP_LEFT) {
+        if ((maxHeight - currentHeight) > (maxWidth-currentWidth)) {
+            leftScore  = calcScoreLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            upScore    = calcScoreUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downScore  = calcScoreDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightScore = calcScoreRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        } else {
+            upScore    = calcScoreUp(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            leftScore  = calcScoreLeft(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            downScore  = calcScoreDown(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+            rightScore = calcScoreRight(forestVector, currentHeight, currentWidth, maxHeight, maxWidth, treeHeight);
+        }
+    }
+
+    return (downScore * upScore * rightScore * leftScore);
+}
+
+int32_t calcScoreRight(
+        const std::vector<int32_t>& forestVector,
+        const int16_t&              currentHeight,
+        const int16_t&              currentWidth,
+        const int16_t&              maxHeight,
+        const int16_t&              maxWidth,
+        const int32_t&              treeHeight)
+{
+    int32_t rightScore = 0;
+    const int32_t currentPosition = (currentHeight * maxWidth) + currentWidth;
+    for (uint16_t i = 1; i < (maxWidth-currentWidth); ++i) {
+        if (treeHeight > forestVector[currentPosition + i]) {
+            rightScore++;
+        } else {
+            rightScore++;
+            break;
+        }
+    }
+    return rightScore;
+}
+
+int32_t calcScoreLeft(
+        const std::vector<int32_t>& forestVector,
+        const int16_t&              currentHeight,
+        const int16_t&              currentWidth,
+        const int16_t&              maxHeight,
+        const int16_t&              maxWidth,
+        const int32_t&              treeHeight)
+{
+    int32_t leftScore = 0;
+    const int32_t currentPosition = (currentHeight * maxWidth) + currentWidth;
+    for (uint16_t i = 1; i <= currentWidth; ++i) { // move to the left
+        if (treeHeight > forestVector[currentPosition - i]) {
+            leftScore++;
+        } else {
+            leftScore++;
+            break;
+        }
+    }
+    return leftScore;
+}
+
+int32_t calcScoreUp(
+        const std::vector<int32_t>& forestVector,
+        const int16_t&              currentHeight,
+        const int16_t&              currentWidth,
+        const int16_t&              maxHeight,
+        const int16_t&              maxWidth,
+        const int32_t&              treeHeight)
+{
+    int32_t upScore = 0;
+    const int32_t currentPosition = (currentHeight * maxWidth) + currentWidth;
+    for (uint16_t i = 1; 0 <= (currentHeight-i); ++i) {
+        // Move to the top
+        if (treeHeight > forestVector[currentPosition - (maxWidth*i)]) {
+            upScore++;
+        } else {
+            upScore++;
+            break;
+        }
+    }
+    return upScore;
+}
+
+int32_t calcScoreDown(
+        const std::vector<int32_t>& forestVector,
+        const int16_t&              currentHeight,
+        const int16_t&              currentWidth,
+        const int16_t&              maxHeight,
+        const int16_t&              maxWidth,
+        const int32_t&              treeHeight)
+{
+    int32_t downScore = 0;
+    const int32_t currentPosition = (currentHeight * maxWidth) + currentWidth;
+    for (uint16_t i = 1; i < (maxHeight - currentHeight); ++i) { // Move to the bottom
+        if (treeHeight > forestVector[currentPosition + (maxWidth*i)]) {
+            downScore++;
+        } else {
+            downScore++;
+            break;
+        }
+    }
+    return downScore;
 }
 
