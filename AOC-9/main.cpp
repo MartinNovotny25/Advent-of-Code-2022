@@ -37,13 +37,13 @@ int main() {
 
 
         // Move head in input direction by input size
-        headObj.move(inputDirection, inputSize);
-        tailObj.chaseHead(headObj);
-        tokenVector.clear();
+        for (int32_t i = 0; i < inputSize; ++i) {
+            headObj.move(inputDirection);
+            tailObj.chaseHead(headObj);
+            tailObj.checkIfVisited();
+        }
 
-        // std::cout << headObj.currentPosition.first << headObj.currentPosition.second << std::endl;
-        // std::cout << tailObj.currentPosition.first << tailObj.currentPosition.second << std::endl;
-        // break;
+        tokenVector.clear();
     }
 
     std::cout << tailObj.visitedVector.size() << std::endl;
