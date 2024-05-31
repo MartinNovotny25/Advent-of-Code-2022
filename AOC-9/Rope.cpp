@@ -34,7 +34,7 @@ void Rope::move(const char* moveDirection) {
     }
 }
 
-void Tail::chaseHead(const Head& headObj) {
+void Tail::chaseHead(const Rope& headObj) {
 
     // Make references to Head position for readability
     const int32_t& xHead = headObj.currentPosition.first;
@@ -70,6 +70,25 @@ void Tail::chaseHead(const Head& headObj) {
         } else {
             xTail = xHead;
             yTail = yHead + 1;
+        }
+    // If the differences are both 1, move diagonally based on where the head is
+    } else {
+        if (yHead > yTail) {
+            if (xHead > xTail) {
+                xTail = xHead - 1;
+                yTail = yHead - 1;
+            } else {
+                xTail = xHead + 1;
+                yTail = yHead - 1;
+            }
+        } else {
+            if (xHead > xTail) {
+                xTail = xHead - 1;
+                yTail = yHead + 1;
+            } else {
+                xTail = xHead + 1;
+                yTail = yHead + 1;
+            }
         }
     }
 }

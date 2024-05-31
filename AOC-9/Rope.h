@@ -27,7 +27,7 @@ public:
 class Tail : public Rope {
 public:
     explicit Tail(const std::pair<int32_t, int32_t>& position) : Rope(position){};
-    void     chaseHead(const Head& headObj);
+    void     chaseHead(const Rope& headObj);
     void     checkIfVisited();
     bool     isTouchingHead(int32_t deltaX, int32_t deltaY);
 
