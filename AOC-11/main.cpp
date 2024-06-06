@@ -27,24 +27,23 @@ int main() {
         }
     }
 
-    for (int32_t round = 0; round < 20; ++round) {
-        std::cout << "----- ROUND: " << round+1 << std::endl;
+    for (int32_t round = 0; round < 10000; ++round) {
         for(Monkey& monkey : monkeyObjVector) {
             monkey.doMonkeyBusiness(monkeyObjVector);
-            //std::cout << std::endl;
         }
-        for(Monkey& monkey : monkeyObjVector) {
-            std::cout << "Monkey " << monkey.index << ": ";
-            for (auto item: monkey.items) {
-                std::cout << item << ", ";
+
+        if (round == 19 || round == 999 || round == 1999) {
+            std::cout << "----- ROUND: " << round+1 << std::endl;
+            for(Monkey& monkey : monkeyObjVector) {
+                std::cout << "Monkey " << monkey.index << " inspected items " << monkey.inspectionCounter << " times.";
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
         }
 
 
     }
 
-    int32_t max1 = 0; int32_t max2 = 0;
+    int64_t max1 = 0; int64_t max2 = 0;
     for (Monkey& monkey : monkeyObjVector) {
         std::cout << monkey.inspectionCounter << std::endl;
         if (monkey.inspectionCounter > max1) {

@@ -7,6 +7,8 @@
 
 #include <bits/chrono.h>
 
+std::vector<int64_t> findAllDivisors(uint64_t num);
+
 void Monkey::doMonkeyBusiness(std::vector<Monkey>& monkeyVector) {
     int32_t& monkeyIfTrue = this->targetMonkeys.first;
     int32_t& monkeyIfFalse = this->targetMonkeys.second;
@@ -20,48 +22,34 @@ void Monkey::doMonkeyBusiness(std::vector<Monkey>& monkeyVector) {
         this->inspectionCounter++;
 
         // Perform operation
-        int32_t& currentItem = *itemIterator;
+        uint64_t& currentItem = *itemIterator;
 
-        //std::cout << "Current item: " << currentItem << std::endl;
-
-        this->doOperation(currentItem);
-
-        //std::cout << "After operation: " << currentItem << std::endl;
-
-        // Divide value by 3
-        //currentItem /= 3;
-        currentItem = std::round(currentItem / 3);
-
-        //std::cout << "After division: " << currentItem << std::endl;
-
-        if (currentItem % this->divisor == 0) {
-
-            //std::cout << "Item divisible by: " << this->divisor << ", thrown to: " << monkeyIfTrue << std::endl;
-            //std::cout << "Before remove: " << items.size() << std::endl;
-            monkeyVector[monkeyIfTrue].items.push_back(currentItem);
-            itemIterator = this->items.erase(itemIterator);
-            //std::cout << std::endl;
-            //std::cout << "After remove: " << items.size() << std::endl;
-
-        } else {
-
-            //std::cout << "Item NOT divisible by: " << this->divisor  <<", thrown to: " << monkeyIfFalse << std::endl;
-            //std::cout << "Before remove: " << items.size() << std::endl;
-            monkeyVector[monkeyIfFalse].items.push_back(currentItem);
-            itemIterator = this->items.erase(itemIterator);
-            //std::cout << "After remove: " << items.size() << std::endl;
-            //std::cout << std::endl;
+        // This can be perfomed before hand, but I grew tired till I figured this out so it will stay like this
+        uint64_t newDivisor = 1;
+        for (const auto& monkey : monkeyVector) {
+            newDivisor *= monkey.divisor;
         }
 
+        this->doOperation(currentItem);
+        currentItem %= newDivisor;
+
+        if (currentItem % this->divisor == 0) {
+            monkeyVector[monkeyIfTrue].items.push_back(currentItem);
+            itemIterator = this->items.erase(itemIterator);
+
+        } else {
+            monkeyVector[monkeyIfFalse].items.push_back(currentItem);
+            itemIterator = this->items.erase(itemIterator);
+        }
     }
 }
 
-void Monkey::doOperation(int32_t& item) {
+void Monkey::doOperation(uint64_t& item) {
     if (this->operation[3] == "*") {
         if(this->operation[4] == "old") {
             item *= item;
         } else {
-            const int32_t constant = std::strtol(this->operation[4].c_str(), nullptr, 10);
+            const int64_t constant = std::strtol(this->operation[4].c_str(), nullptr, 10);
             item *= constant;
         }
 
@@ -69,8 +57,9 @@ void Monkey::doOperation(int32_t& item) {
         if(this->operation[4] == "old") {
             item += item;
         } else {
-            const int32_t constant = std::strtol(this->operation[4].c_str(), nullptr, 10);
+            const int64_t constant = std::strtol(this->operation[4].c_str(), nullptr, 10);
             item += constant;
         }
     }
 }
+
