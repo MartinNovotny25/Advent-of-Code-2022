@@ -59,49 +59,134 @@ int main() {
         }
     }
 
+    heigthGrid[finish.first][finish.second].elevation = maxElevation;
+
     // Perform search
 
-    std::vector<Square*> currentPath;                    // Vector for maintaining current path and backtracing
-    currentPath.push_back(&heigthGrid[start.first][start.second]);
+    std::vector<Path> allPaths;
+    Path initPath;
+    initPath.pathVector.push_back(&heigthGrid[start.first][start.second]);
+    allPaths.push_back(initPath);
 
-    int32_t stepCounter = 0;
+    uint32_t bigcounter = 0;
+
     while (true) {
-        //std::cout << "STEP: " << stepCounter << std::endl;
-        //printQueue(queue);
+        bigcounter++;
+        int32_t origSize    = 0;
+        int32_t addedSize   = 0;
 
-        Square*      currentSquare       = currentPath[currentPath.size()-1];
-        Square*      prevSquare          = currentPath[currentPath.size()-2];
-        int32_t      currentElevation    = currentSquare->elevation;
-        int32_t      squareX             = currentSquare->xCoord;
-        int32_t      squareY             = currentSquare->yCoord;
+        origSize = allPaths.size();
+        std::vector<Path> newPaths;
+        std::vector<int32_t> remove;
+        int32_t counter = 0;
+
+        for (Path& path : allPaths) {
 
 
-        if (currentSquare->elevation == 'E') { std::cout << "DONE" << std::endl; break; }
+            Square* lastSquare = path.pathVector.at(path.pathVector.size()-1);
+            if (lastSquare == &heigthGrid[finish.first][finish.second]) {
+                std::cout << "SIZE: " << path.pathVector.size() << std::endl;
+                printPath(heigthGrid, path.pathVector);
+                return 0;
+            }
 
-        Square* nextSquare = nullptr;
-        nextSquare = Search::chooseBestSquare(*currentSquare, mapWidth, mapHeight, heigthGrid, maxElevation, currentPath);
+            Square* currentSquare = path.pathVector.at(path.pathVector.size()-1);
+            int32_t     squareX             = currentSquare->xCoord;
+            int32_t     squareY             = currentSquare->yCoord;
 
-        while (nextSquare == nullptr) {
-            currentSquare->leftChecked = false;
-            currentSquare->rightChecked = false;
-            currentSquare->upChecked = false;
-            currentSquare->downChecked = false;
+            Square* left    = nullptr;
+            Square* right   = nullptr;
+            Square* up      = nullptr;
+            Square* down    = nullptr;
 
-            currentPath.erase(currentPath.end()-1);
-            currentSquare = currentPath.at(currentPath.size()-1);
+            if (squareX > 0)                { left  = &heigthGrid[squareY][squareX-1]; }
+            if (squareX < mapWidth-1)       { right = &heigthGrid[squareY][squareX+1]; }
+            if (squareY < mapHeight-1)      { down  = &heigthGrid[squareY+1][squareX]; }
+            if (squareY > 0)                { up    = &heigthGrid[squareY-1][squareX]; }
 
-            stepCounter--;
-            nextSquare = Search::chooseBestSquare(*currentSquare, mapWidth, mapHeight, heigthGrid, maxElevation, currentPath);
+            if (left == nullptr && right == nullptr && up == nullptr && down == nullptr) {
+                remove.push_back(counter);
+                continue;
+            }
+
+            for (int32_t i = 0; i < 4; i++) {
+                Path newPath;
+                switch (i) {
+                    case 0:
+                        if (left != nullptr && !Search::checkIfVisited(path.pathVector, left)
+                            && left->elevation <= currentSquare->elevation + 1) {
+                            newPath = path;
+                            newPath.pathVector.push_back(left);
+                            newPaths.push_back(newPath);
+                            addedSize++;
+                            break;
+                        } else {
+                            left = nullptr;
+                            break;
+                        }
+                    case 1:
+                        if (right != nullptr && !Search::checkIfVisited(path.pathVector, right)
+                            && right->elevation <= currentSquare->elevation + 1) {
+                            newPath = path;
+                            newPath.pathVector.push_back(right);
+                            newPaths.push_back(newPath);
+                            addedSize++;
+                            break;
+                        }
+                        else {
+                            right = nullptr;
+                            break;
+                        }
+                    case 2:
+                        if (up != nullptr && !Search::checkIfVisited(path.pathVector, up)
+                            && up->elevation <= currentSquare->elevation + 1) {
+                            newPath = path;
+                            newPath.pathVector.push_back(up);
+                            newPaths.push_back(newPath);
+                            addedSize++;
+                            break;
+                        }
+                        else {
+                            up = nullptr;
+                            break;
+                        }
+
+                    case 3:
+                        if (down != nullptr && !Search::checkIfVisited(path.pathVector, down)
+                            && down->elevation <= currentSquare->elevation + 1) {
+                            newPath = path;
+                            newPath.pathVector.push_back(down);
+                            newPaths.push_back(newPath);
+                            addedSize++;
+                            break;
+                        }
+                        else {
+                            down = nullptr;
+                            break;
+                        }
+                }
+            }
 
         }
 
-        currentPath.push_back(nextSquare);
-        printPath(heigthGrid, currentPath);
+        for (auto index : remove) {
+            allPaths.erase(allPaths.begin(), allPaths.begin() + index);
+        }
+        origSize = allPaths.size();
 
-        stepCounter++;
+        allPaths.insert(allPaths.end(), newPaths.begin(), newPaths.end());
+        //std::cout << allPaths.size() << std::endl;
+        allPaths.erase(allPaths.begin(), allPaths.begin() + origSize);
+        //std::cout << "NEW: " << allPaths.size() << std::endl;
+
+        std::cout << bigcounter << std::endl;
+        if (bigcounter % 20 == 0) {
+            for (auto path : allPaths) {
+                printPath(heigthGrid, path.pathVector);
+            }
+        }
     }
 
-    std::cout << stepCounter << std::endl;
     return 0;
 }
 

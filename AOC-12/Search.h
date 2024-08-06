@@ -12,9 +12,15 @@
 
 class Search {
 public:
-    static Square* chooseBestSquare(Square& currentSquare, int32_t mapWidth, int32_t mapHeight, HeightGrid& heightGrid, int32_t maxElevation, std::vector<Square*> &currentPath);
-    static Square* evalNeighbour(Square* neighbour, Square* currentBest, Square* currentSquare, int32_t maxElevation);
+    static Square* chooseBestSquare();
+    static Square* evalNeighbour();
     static bool checkIfVisited(std::vector<Square*>& currentPath, Square* square);
 };
 
+
+class Path {
+public:
+    std::vector<Square*> pathVector;
+    std::vector<Square*> closedVector;
+};
 #endif //SEARCH_H
